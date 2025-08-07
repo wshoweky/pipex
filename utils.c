@@ -1,16 +1,44 @@
-#include <complex.h>
-#include <cstdio>
-#include <stdio.h>
-#include <unistd.h>
 #include "pipex.h"
+#include "libft/libft.h"
 
-void	ft_error(void)
+void	error(void)
 {
-	perror("smth!\n");
+	perror("Error");
 	exit(EXIT_FAILURE);
 }
 
-//TODO ft_free
+void	error_with_message(const char *message)
+{
+	if (message)
+	{
+		fprintf(stderr, "%s: %s\n", message, strerror(errno));
+		fflush(stderr);
+	}
+	else
+	{
+		perror("Error");
+		fflush(stderr);
+	}
+	exit(EXIT_FAILURE);
+}
+
+void	ft_error(void)
+{
+	perror("Error");
+	exit(EXIT_FAILURE);
+}
+
+void	ft_free(void **ptr)
+{
+	int	i;
+
+	i = 0;
+	if (!ptr || !*ptr)
+		return ;
+	while (ptr[i])
+		free(ptr[i++]);
+	free(ptr);
+}
 
 char	*search_path(char *cmd, char **envp)
 {
@@ -20,22 +48,40 @@ char	*search_path(char *cmd, char **envp)
 	int	i;
 
 	i = 0;
-	while (ft_strnstr(envp[i], "PATH", 4) == NULL)
+	if (!envp)
+		return (NULL);
+	while (envp[i] && ft_strnstr(envp[i], "PATH", 4) == NULL)
 		i++;
+	if (!envp[i])
+		return (NULL);
 	paths = ft_split(envp[i] + 5, ':');
+	if (!paths)
+		return (NULL);
 	i = 0;
 	while (paths[i])
 	{
-		//can we get away with only one var path?! join returns alloc ptr
 		part_path = ft_strjoin(paths[i], "/");
+		if (!part_path)
+		{
+			ft_free((void **)paths);
+			return (NULL);
+		}
 		path = ft_strjoin(part_path, cmd);
 		free(part_path);
+		if (!path)
+		{
+			ft_free((void **)paths);
+			return (NULL);
+		}
 		if (access(path, F_OK) == 0)
+		{
+			ft_free((void **)paths);
 			return (path);
+		}
 		free(path);
 		i++;
 	}
-	ft_free(paths[--i]);
+	ft_free((void **)paths);
 	return (NULL);
 }
 
@@ -44,15 +90,21 @@ void	exe(char *argv, char **envp)
 	char	**cmd;
 	char	*path;
 
-	cmd = ft_split(argv, 32);
+	cmd = ft_split(argv, ' ');
+	if (!cmd)
+		error_with_message("memory allocation");
 	path = search_path(cmd[0], envp);
 	if (!path)
 	{
-		ft_free(cmd);
-		ft_error();
+		ft_free((void **)cmd);
+		errno = ENOENT;  // No such file or directory
+		error_with_message(cmd[0]);
 	}
-	//is execve gonna free path later??
 	if (-1 == execve(path, cmd, envp))
-		ft_error();
+	{
+		free(path);
+		ft_free((void **)cmd);
+		error_with_message(cmd[0]);
+	}
 }
 
