@@ -9,6 +9,13 @@ echo "🚀 Quick Pipex Test"
 echo "📦 Compiling..."
 make
 
+# Create a large file
+shuf -n 500 /usr/share/dict/words | tr '\n' ' ' | fold -s -w 80 > lorem.txt
+
+#for i in {1..200}; do shuf -n 8 /usr/share/dict/words | paste -sd' ' -; done > lorem.txt
+#./pipex lorem.txt "cat" "wc -l" outfile
+#cat outfile   # should print: 200
+
 # Basic test
 echo "🔧 Basic functionality test..."
 echo "test content" > test_input.txt

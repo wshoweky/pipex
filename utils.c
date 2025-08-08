@@ -1,5 +1,4 @@
 #include "pipex.h"
-#include "libft/libft.h"
 
 void	error(void)
 {
@@ -11,7 +10,7 @@ void	error_with_message(const char *message)
 {
 	if (message)
 	{
-		fprintf(stderr, "%s: %s\n", message, strerror(errno));
+		fprintf(stderr, "%s\n", message); //, strerror(errno));
 		fflush(stderr);
 	}
 	else
@@ -97,8 +96,8 @@ void	exe(char *argv, char **envp)
 	if (!path)
 	{
 		ft_free((void **)cmd);
-		errno = ENOENT;  // No such file or directory
-		error_with_message(cmd[0]);
+		//errno = ENOENT;  // No such file or directory		
+		error_with_message("command not found");
 	}
 	if (-1 == execve(path, cmd, envp))
 	{

@@ -7,6 +7,7 @@
 #include <stdio.h>
 #include <fcntl.h>
 #include <sys/wait.h>
+#include "libft/libft.h"
 #include <errno.h>
 
 // Function declarations
