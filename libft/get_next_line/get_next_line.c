@@ -1,3 +1,15 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   get_next_line.c                                    :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: wshoweky <wshoweky@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/08 12:14:00 by wshoweky          #+#    #+#             */
+/*   Updated: 2025/08/08 12:21:26 by wshoweky         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "get_next_line.h"
 
 char	*get_next_line(int fd)
@@ -6,7 +18,7 @@ char	*get_next_line(int fd)
 	char		*next_line;
 	int			i;
 
-	if (fd < 0 || BUFFER_SIZE < 1)
+	if (fd < 0 || BUFFER_SIZE < 1 || fd > FDMAX - 1)
 		return (0);
 	next_line = gnl_strjoin (0, buffer);
 	if (gnl_clean(buffer) > 0)

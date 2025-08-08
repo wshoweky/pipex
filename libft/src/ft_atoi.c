@@ -16,7 +16,7 @@ long	ft_atoi(const char *str)
 {
 	long		i;
 	int			sign;
-	long		number;
+	long long	number;
 
 	i = 0;
 	number = 0;
@@ -31,16 +31,14 @@ long	ft_atoi(const char *str)
 	}
 	while (str[i] >= '0' && str[i] <= '9')
 	{
-		if (sign == 1 && (number > LONG_MAX / 10 || 
-			(number == LONG_MAX / 10 && (str[i] - '0') > LONG_MAX % 10)))
-			return (LONG_MAX);
-		if (sign == -1 && (number > -(LONG_MIN / 10) || 
-			(number == -(LONG_MIN / 10) && (str[i] - '0') > -(LONG_MIN % 10))))
-			return (LONG_MIN);
-		number = (number * 10) + (str[i] - '0');
-		i++;
+		number = (number * 10) + (str[i++] - '0');
 	}
-	return (number * sign);
+	number *= sign;
+	if (number > 2147483647)
+		return (2147483648);
+	else if (number < -2147483648)
+		return (-2147483649);
+	return (number);
 }
 /*
 long	ft_atol(const char *nptr)

@@ -1,20 +1,28 @@
-#ifndef PIPEX_H
-#define PIPEX_H
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipex.h                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: wshoweky <wshoweky@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/08 12:48:15 by wshoweky          #+#    #+#             */
+/*   Updated: 2025/08/08 14:14:13 by wshoweky         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/wait.h>
-#include "libft/libft.h"
-#include <errno.h>
+#ifndef PIPEX_H
+# define PIPEX_H
+
+# include <unistd.h>
+# include <string.h>
+# include <stdio.h>
+# include <fcntl.h>
+# include <sys/wait.h>
+# include "libft/libft.h"
 
 // Function declarations
-void	error(void);
 void	error_with_message(const char *message);
 void	exe(char *argv, char **envp);
-void	ft_error(void);
 char	*search_path(char *cmd, char **envp);
 void	ft_free(void **ptr);
 

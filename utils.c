@@ -1,29 +1,23 @@
-#include "pipex.h"
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   utils.c                                            :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: wshoweky <wshoweky@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/08 12:48:59 by wshoweky          #+#    #+#             */
+/*   Updated: 2025/08/08 14:28:43 by wshoweky         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
 
-void	error(void)
-{
-	perror("Error");
-	exit(EXIT_FAILURE);
-}
+#include "pipex.h"
 
 void	error_with_message(const char *message)
 {
 	if (message)
-	{
-		fprintf(stderr, "%s\n", message); //, strerror(errno));
-		fflush(stderr);
-	}
+		perror(message);
 	else
-	{
 		perror("Error");
-		fflush(stderr);
-	}
-	exit(EXIT_FAILURE);
-}
-
-void	ft_error(void)
-{
-	perror("Error");
 	exit(EXIT_FAILURE);
 }
 
@@ -44,34 +38,18 @@ char	*search_path(char *cmd, char **envp)
 	char	**paths;
 	char	*path;
 	char	*part_path;
-	int	i;
+	int		i;
 
 	i = 0;
-	if (!envp)
-		return (NULL);
 	while (envp[i] && ft_strnstr(envp[i], "PATH", 4) == NULL)
 		i++;
-	if (!envp[i])
-		return (NULL);
 	paths = ft_split(envp[i] + 5, ':');
-	if (!paths)
-		return (NULL);
 	i = 0;
 	while (paths[i])
 	{
 		part_path = ft_strjoin(paths[i], "/");
-		if (!part_path)
-		{
-			ft_free((void **)paths);
-			return (NULL);
-		}
 		path = ft_strjoin(part_path, cmd);
 		free(part_path);
-		if (!path)
-		{
-			ft_free((void **)paths);
-			return (NULL);
-		}
 		if (access(path, F_OK) == 0)
 		{
 			ft_free((void **)paths);
@@ -91,19 +69,17 @@ void	exe(char *argv, char **envp)
 
 	cmd = ft_split(argv, ' ');
 	if (!cmd)
-		error_with_message("memory allocation");
+		error_with_message("Error: memory allocation\n");
 	path = search_path(cmd[0], envp);
 	if (!path)
 	{
 		ft_free((void **)cmd);
-		//errno = ENOENT;  // No such file or directory		
-		error_with_message("command not found");
+		error_with_message("Error: File does not exist (ENOENT)\n");
 	}
 	if (-1 == execve(path, cmd, envp))
 	{
 		free(path);
 		ft_free((void **)cmd);
-		error_with_message(cmd[0]);
+		error_with_message("Error: execve failed\n");
 	}
 }
-
