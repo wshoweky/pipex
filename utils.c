@@ -45,7 +45,7 @@ char	*search_path(char *cmd, char **envp)
 		i++;
 	paths = ft_split(envp[i] + 5, ':');
 	i = 0;
-	while (paths[i])
+	while (paths && paths[i])
 	{
 		part_path = ft_strjoin(paths[i], "/");
 		path = ft_strjoin(part_path, cmd);
@@ -67,19 +67,21 @@ void	exe(char *argv, char **envp)
 	char	**cmd;
 	char	*path;
 
+	if (!argv || !envp || !*argv || !*envp)
+		error_with_message("Error: invalid arguments");
 	cmd = ft_split(argv, ' ');
 	if (!cmd)
-		error_with_message("Error: memory allocation\n");
+		error_with_message("Error: memory allocation");
 	path = search_path(cmd[0], envp);
 	if (!path)
 	{
 		ft_free((void **)cmd);
-		error_with_message("Error: File does not exist (ENOENT)\n");
+		error_with_message("Error: file does not exist (ENOENT)");
 	}
 	if (-1 == execve(path, cmd, envp))
 	{
 		free(path);
 		ft_free((void **)cmd);
-		error_with_message("Error: execve failed\n");
+		error_with_message("Error: execve failed");
 	}
 }

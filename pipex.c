@@ -31,7 +31,7 @@ void	original_process(int *pipe_fd, char **argv, char **envp)
 {
 	int	outfile;
 
-	outfile = open(argv[4], O_WRONLY | O_CREAT | O_TRUNC, 0644);
+	outfile = open(argv[4], O_WRONLY | O_TRUNC | O_CREAT, 0644);
 	if (-1 == outfile)
 		error_with_message(argv[4]);
 	dup2(outfile, STDOUT_FILENO);
@@ -48,16 +48,16 @@ int	main(int argc, char **argv, char **envp)
 	int		status;
 	pid_t	pid;
 
-	if (argc != 5)
+	if (5 != argc)
 	{
-		ft_printf("Usage: file1 cmd1 cmd2 file2\n");
+		ft_printf("Usage: file1 cmd1 cmd2 file2");
 		return (-1);
 	}
 	if (-1 == pipe(pipe_fd))
-		error_with_message("Error: pipe\n");
+		error_with_message("Error: pipe");
 	pid = fork();
 	if (-1 == pid)
-		error_with_message("Error: fork\n");
+		error_with_message("Error: fork");
 	if (0 == pid)
 		sub_process(pipe_fd, argv, envp);
 	waitpid(pid, &status, 0);
@@ -66,3 +66,5 @@ int	main(int argc, char **argv, char **envp)
 	original_process(pipe_fd, argv, envp);
 	return (0);
 }
+//pid_t (*fp)(void) = fork; // fp points to fork
+//pid_t pid = fp();         // call via indirection

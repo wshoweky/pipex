@@ -1,0 +1,41 @@
+graph TD
+    A["🚀 pipex_bonus start"] --> B{{"Check argc & argv[1]"}}
+    
+    B -->|"argc >= 6 && argv[1] == 'here_doc'"| C["📝 heredoc() function"]
+    B -->|"argc >= 5"| D["🔗 pipex() function"]
+    B -->|"argc < 5"| E["❌ Show usage & exit"]
+    
+    C --> C1["📖 heredoc_run_first_cmd()"]
+    C1 --> C2["Read lines from STDIN"]
+    C2 --> C3{{"Line == delimiter?"}}
+    C3 -->|"No"| C4["Write line to pipe_fd[1]"]
+    C4 --> C2
+    C3 -->|"Yes"| C5["repipe() & process first cmd"]
+    
+    D --> D1["📂 pipex_run_first_cmd()"]
+    D1 --> D2["Open infile as prev_read"]
+    D2 --> D3["process_cmd(argv[2])"]
+    
+    C5 --> F["🔄 Middle commands loop"]
+    D3 --> F
+    
+    F --> F1["i = 3 or 4 (depending on mode)"]
+    F1 --> F2{{"i < argc - 2?"}}
+    F2 -->|"Yes"| F3["repipe()"]
+    F3 --> F4["process_cmd(argv[i++])"]
+    F4 --> F2
+    F2 -->|"No"| G["🎯 Last command"]
+    
+    G --> G1["unpipe()"]
+    G1 --> G2["run_last_cmd_and_wait_all()"]
+    G2 --> G3["Open outfile as pipe_fd[1]"]
+    G3 --> G4["process_cmd(last command)"]
+    G4 --> G5["wait() for all children"]
+    G5 --> H["✅ clean_exit()"]
+    
+    style A fill:#e1f5fe
+    style C fill:#fff3e0
+    style D fill:#f3e5f5
+    style F fill:#e8f5e8
+    style G fill:#ffebee
+    style H fill:#e0f2f1
