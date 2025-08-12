@@ -1,10 +1,4 @@
-#include <stdio.h>
-#include <fcntl.h>
-#include <time.h>
-#include <unistd.h>
-#include <string.h>
-#include <stdlib.h>
-#include "pipex_bonus.h"
+#include "../include/pipex.h"
 
 #define HEREDOC_YES 1
 #define HEREDOC_NO 0
@@ -17,7 +11,7 @@ static void	setup_infile(char *filename)
 	if (-1 == fd)
 	{
 		perror(filename);
-		exit(EXIT_FAILURE);
+		return ;
 	}
 	dup2(fd, STDIN_FILENO);
 	close(fd);
@@ -42,28 +36,20 @@ static void	setup_outfile(char *outfile, int is_heredoc)
 
 static void	process_args(int ac, char *av[], char *env[], int is_heredoc)
 {
-	t_pid_manager	*pid_mgr;
-	int				i;
-	int				max_pids;
+	int	process_count;
+	int	i;
 
-	max_pids = ac - (3 + is_heredoc);
-	pid_mgr = init_pid_manager(max_pids);
-	if (!pid_mgr)
-		error_with_cleanup("malloc", NULL);
-	
+	process_count = 0;
 	if (is_heredoc)
 		process_heredoc(av[2]);
-	
 	i = 2 + is_heredoc;
 	while (i < ac - 2)
 	{
-		process_command(av[i], env, pid_mgr);
+		process_command(av[i], env, &process_count);
 		i++;
 	}
-	
 	setup_outfile(av[ac - 1], is_heredoc);
-	wait_for_process(pid_mgr);
-	cleanup_pid_manager(pid_mgr);
+	wait_for_all_processes(process_count);
 	exe(av[ac - 2], env);
 }
 
@@ -72,7 +58,7 @@ int	main(int argc, char **argv, char **envp)
 	if (argc < 5)
 	{
 		show_usage();
-		exit (1);
+		exit(1);
 	}
 	if ((argc > 5) && ft_strncmp(argv[1], "here_doc", 8) == 0)
 	{

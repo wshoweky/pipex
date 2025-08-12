@@ -17,7 +17,7 @@ static void	setup_infile(char *filename)
 	if (-1 == fd)
 	{
 		perror(filename);
-		exit(EXIT_FAILURE);
+		return ;
 	}
 	dup2(fd, STDIN_FILENO);
 	close(fd);
@@ -34,7 +34,7 @@ static void	setup_outfile(char *outfile, int is_heredoc)
 	if (-1 == fd)
 	{
 		perror(outfile);
-		exit(EXIT_FAILURE);
+		exit (EXIT_FAILURE);
 	}
 	dup2(fd, STDOUT_FILENO);
 	close(fd);
@@ -42,28 +42,27 @@ static void	setup_outfile(char *outfile, int is_heredoc)
 
 static void	process_args(int ac, char *av[], char *env[], int is_heredoc)
 {
-	t_pid_manager	*pid_mgr;
-	int				i;
-	int				max_pids;
+	pid_t	*pids;
+	int	pid_count;
+	int	i;
+	int	max_pids;
 
 	max_pids = ac - (3 + is_heredoc);
-	pid_mgr = init_pid_manager(max_pids);
-	if (!pid_mgr)
-		error_with_cleanup("malloc", NULL);
-	
+	pids = malloc(sizeof(pid_t) * max_pids);
+	if (!pids)
+		error_with_message("malloc");
+	pid_count = 0;
 	if (is_heredoc)
 		process_heredoc(av[2]);
-	
 	i = 2 + is_heredoc;
 	while (i < ac - 2)
 	{
-		process_command(av[i], env, pid_mgr);
+		process_command(av[i], env, &pids, &pid_count);
 		i++;
 	}
-	
 	setup_outfile(av[ac - 1], is_heredoc);
-	wait_for_process(pid_mgr);
-	cleanup_pid_manager(pid_mgr);
+	wait_for_process(pids, pid_count);
+	free(pids);
 	exe(av[ac - 2], env);
 }
 

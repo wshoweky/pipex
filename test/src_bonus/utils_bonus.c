@@ -1,4 +1,3 @@
-#include <stdio.h>
 #include "pipex_bonus.h"
 
 void	error_with_message(const char *msg)
@@ -7,21 +6,6 @@ void	error_with_message(const char *msg)
 		perror(msg);
 	else
 		perror("Error");
-	exit(EXIT_FAILURE);
-}
-
-void	error_with_cleanup(const char *msg, t_pid_manager *pid_mgr)
-{
-	/* Clean up any allocated memory before exiting */
-	if (pid_mgr)
-		cleanup_pid_manager(pid_mgr);
-	
-	/* Print the error message */
-	if (msg)
-		perror(msg);
-	else
-		perror("Error");
-	
 	exit(EXIT_FAILURE);
 }
 

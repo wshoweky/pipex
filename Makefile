@@ -10,7 +10,7 @@ SRCS = src/pipex.c src/utils.c
 OBJS = $(SRCS:.c=.o)
 
 # Bonus sources
-SRCS_BONUS = src_bonus/pipex_bonus.c src_bonus/heredoc.c src_bonus/process.c src_bonus/utils_bonus.c
+SRCS_BONUS = src_bonus/pipex_bonus.c src_bonus/heredoc.c src_bonus/process.c src_bonus/utils_bonus.c src_bonus/pid_manager.c
 OBJS_BONUS = $(SRCS_BONUS:.c=.o)
 
 .PHONY: all clean fclean re bonus
