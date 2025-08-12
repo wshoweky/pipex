@@ -18,7 +18,7 @@
 # include <stdio.h>
 # include <fcntl.h>
 # include <sys/wait.h>
-# include "libft/libft.h"
+# include "../libft/libft.h"
 
 // Function declarations
 void	error_with_message(const char *message);

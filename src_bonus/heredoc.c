@@ -1,5 +1,4 @@
 #include <stdio.h>
-#include <threads.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -22,7 +21,7 @@ static void	read_heredoc_input(char *limiter, int write_fd)
 
 	limiter_len = ft_strlen(limiter);
 	write(STDOUT_FILENO, "heredoc> ", 9);
-	while (set_next_line(STDIN_FILENO, &line) > 0)
+	while ((line = get_next_line(STDIN_FILENO)) != NULL)
 	{
 		if (is_limiter_found(line, limiter, limiter_len))
 		{
@@ -57,13 +56,13 @@ void	process_heredoc(char *limiter)
 	int	fd[2];
 
 	if (-1 == pipe(fd))
-		error();
+		error_with_message("pipe");
 	reader = fork();
 	if (-1 == reader)
 	{
 		close (fd[0]);
 		close (fd[1]);
-		error ();
+		error_with_message ("fork");
 	}
 	if (0 == reader)
 		setup_heredoc_child(limiter, fd);

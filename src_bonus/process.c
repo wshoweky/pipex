@@ -23,13 +23,13 @@ void	process_command(char *cmd, char **envp, pid_t **pids, int *count)
 	int	fd[2];
 
 	if (-1 == pipe(fd))
-		error();
+		error_with_message("pipe");
 	pid = fork();
 	if (-1 == pid)
 	{
 		close(fd[0]);
 		close(fd[1]);
-		error();
+		error_with_message("fork");
 	}
 	if (0 == pid)
 	{
