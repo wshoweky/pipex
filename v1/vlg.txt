@@ -1,0 +1,1 @@
+tester_pipex.sh: line 599: /usr/bin/valgrind: No such file or directory
