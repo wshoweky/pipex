@@ -43,21 +43,18 @@ int	wait_for_processes(int count, pid_t last_pid)
 
 	i = 0;
 	exit_status = 0;
-	
 	/* Wait for intermediate processes */
 	while (i < count)
 	{
 		wait(NULL);
 		i++;
 	}
-	
 	/* Wait for the last process and get its exit status */
 	pid = waitpid(last_pid, &status, 0);
 	if (pid == last_pid && WIFEXITED(status))
 		exit_status = WEXITSTATUS(status);
 	else if (WIFSIGNALED(status))
 		exit_status = 128 + WTERMSIG(status);
-	
 	return (exit_status);
 }
 

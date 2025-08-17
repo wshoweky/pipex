@@ -61,12 +61,13 @@ static void	setup_outfile(char *outfile, int is_heredoc)
 ** Sets up the output file
 ** Waits for all processes to complete
 ** Executes the last command
+** Returns the exit status of the last command
 */
-static void	process_args(int ac, char **av, char **en, int is_heredoc)
+static int	process_args(int ac, char **av, char **en, int is_heredoc)
 {
-	int	process_count;
-	int	i;
-	int	exit_status;
+	int		process_count;
+	int		i;
+	int		exit_status;
 	pid_t	last_pid;
 
 	process_count = 0;
@@ -76,17 +77,15 @@ static void	process_args(int ac, char **av, char **en, int is_heredoc)
 	while (i < ac - 2)
 		process_command(av[i++], en, &process_count);
 	setup_outfile(av[ac - 1], is_heredoc);
-	
 	/* Execute the last command */
 	last_pid = fork();
 	if (last_pid == -1)
 		system_call_error("fork");
 	if (last_pid == 0)
 		exe(av[ac - 2], en);
-	
 	/* Wait for all processes and get the exit status */
 	exit_status = wait_for_processes(process_count, last_pid);
-	exit(exit_status);
+	return (exit_status);
 }
 
 /*
@@ -96,9 +95,12 @@ static void	process_args(int ac, char **av, char **en, int is_heredoc)
 ** Supports multiple commands and heredoc
 ** Usage: ./pipex file1 cmd1 cmd2 ... cmdn file2
 **        ./pipex here_doc LIMITER cmd1 cmd2 ... cmdn file2
+** Returns the exit status of the last command
 */
 int	main(int ac, char **av, char **en)
 {
+	int	exit_status;
+
 	if (ac < 5)
 	{
 		show_usage();
@@ -106,12 +108,12 @@ int	main(int ac, char **av, char **en)
 	}
 	if ((ac > 5) && ft_strncmp(av[1], "here_doc", 8) == 0)
 	{
-		process_args(ac, av, en, 1);
+		exit_status = process_args(ac, av, en, 1);
 	}
 	else
 	{
 		setup_infile(av[1]);
-		process_args(ac, av, en, 0);
+		exit_status = process_args(ac, av, en, 0);
 	}
-	return (0); /* This is never reached because process_args calls exit() */
+	return (exit_status);
 }

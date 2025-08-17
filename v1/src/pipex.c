@@ -18,7 +18,7 @@
 ** Redirects stdout to the write end of the pipe
 ** Executes the first command
 */
-void	sub_process(int *pipe_fd, char **argv, char **envp)
+static void	first_child(int *pipe_fd, char **argv, char **envp)
 {
 	int	infile;
 
@@ -46,7 +46,7 @@ void	sub_process(int *pipe_fd, char **argv, char **envp)
 ** Redirects stdin to the read end of the pipe
 ** Executes the second command
 */
-void	original_process(int *pipe_fd, char **argv, char **envp)
+static void	second_child(int *pipe_fd, char **argv, char **envp)
 {
 	int	outfile;
 
@@ -80,12 +80,12 @@ static void	create_children(int *pipe_fd, char **argv, char **envp, pid_t *pids)
 	if (-1 == pids[0])
 		system_call_error("fork");
 	if (0 == pids[0])
-		sub_process(pipe_fd, argv, envp);
+		first_child(pipe_fd, argv, envp);
 	pids[1] = fork();
 	if (-1 == pids[1])
 		system_call_error("fork");
 	if (0 == pids[1])
-		original_process(pipe_fd, argv, envp);
+		second_child(pipe_fd, argv, envp);
 }
 
 /*
