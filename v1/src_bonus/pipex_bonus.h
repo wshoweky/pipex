@@ -23,11 +23,9 @@
 
 /* Function prototypes */
 void	ft_free(char **ptr);
-void	error_with_message(const char *msg);
 void	exe(char *argv, char **envp);
 void	process_heredoc(char *limiter);
 void	process_command(char *cmd, char **envp, int *process_count);
-void	wait_for_all_processes(int count);
 int		wait_for_processes(int count, pid_t last_pid);
 void	show_usage(void);
 char	*search_path(char *cmd, char **envp);

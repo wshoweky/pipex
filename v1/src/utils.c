@@ -13,21 +13,6 @@
 #include "pipex.h"
 
 /*
-** Prints an error message using perror and exits the program
-** If message is provided, it's used as the error prefix
-** Otherwise, a generic "Error" prefix is used
-** Always exits with EXIT_FAILURE status code
-*/
-void	error_with_message(const char *message)
-{
-	if (message)
-		perror(message);
-	else
-		perror("Error");
-	exit(EXIT_FAILURE);
-}
-
-/*
 ** Frees a NULL-terminated array of strings and the array itself
 ** Safely handles NULL pointers and empty arrays
 ** Used to free memory allocated by functions like ft_split

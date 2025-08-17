@@ -13,21 +13,6 @@
 #include "pipex_bonus.h"
 
 /*
-** Prints an error message using perror and exits the program
-** If message is provided, it's used as the error prefix
-** Otherwise, a generic "Error" prefix is used
-** Always exits with EXIT_FAILURE status code
-*/
-void	error_with_message(const char *msg)
-{
-	if (msg)
-		perror(msg);
-	else
-		perror("Error");
-	exit(EXIT_FAILURE);
-}
-
-/*
 ** Displays usage information for the program
 ** Shows how to use the program with regular files
 ** Shows how to use the program with heredoc

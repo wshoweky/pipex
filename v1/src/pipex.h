@@ -23,7 +23,6 @@
 
 //prototypes!
 void	exe(char *argv, char **envp);
-void	error_with_message(const char *msg);
 void	ft_free(char **ptr);
 char	*search_path(char *cmd, char **envp);
 

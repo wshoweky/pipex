@@ -13,23 +13,6 @@
 #include "pipex_bonus.h"
 
 /*
-** Waits for all child processes to complete
-** Takes the number of processes to wait for
-** Uses wait() to collect exit status and prevent zombies
-*/
-void	wait_for_all_processes(int count)
-{
-	int	i;
-
-	i = 0;
-	while (i < count)
-	{
-		wait(NULL);
-		i++;
-	}
-}
-
-/*
 ** Waits for all processes including the last one
 ** Returns the exit status of the last command
 ** Ensures proper handling of exit status
