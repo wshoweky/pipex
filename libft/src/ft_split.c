@@ -6,7 +6,7 @@
 /*   By: wshoweky <wshoweky@student.hive.fi>        +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2025/04/25 10:55:45 by wshoweky          #+#    #+#             */
-/*   Updated: 2025/07/28 14:33:03 by wshoweky         ###   ########.fr       */
+/*   Updated: 2025/08/18 11:00:38 by wshoweky         ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
@@ -91,9 +91,11 @@ char	**ft_split(char const *s, char c)
 	int		count;
 
 	count = word_count(s, c);
+	if (!count || !s)
+		return (NULL);
 	str = (char **)malloc((count + 1) * sizeof(char *));
-	if (!str || !s)
-		return (0);
+	if (!str)
+		return (NULL);
 	str = ft_split_words(s, c, str, count);
 	return (str);
 }

@@ -1,35 +1,39 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   pipex_bonus.h                                      :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: wshoweky <wshoweky@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/14 16:00:02 by wshoweky          #+#    #+#             */
+/*   Updated: 2025/08/18 12:05:48 by wshoweky         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #ifndef PIPEX_BONUS_H
 # define PIPEX_BONUS_H
 
 # include <unistd.h>
 # include <stdlib.h>
 # include <fcntl.h>
+# include <string.h>
+# include <stdio.h>
 # include <sys/wait.h>
-# include <errno.h>
 # include "../libft/libft.h"
 
-/* Struct to manage process IDs and memory */
-typedef struct s_pid_manager
-{
-	pid_t	*pids;
-	int		count;
-	int		capacity;
-}	t_pid_manager;
-
-/* Function declarations */
-void	error_with_message(const char *message);
-void	error_with_cleanup(const char *message, t_pid_manager *pid_mgr);
-void	show_usage(void);
+/* Function prototypes */
 void	ft_free(char **ptr);
-char	*search_path(char *cmd, char **envp);
 void	exe(char *argv, char **envp);
 void	process_heredoc(char *limiter);
-void	process_command(char *cmd, char **envp, t_pid_manager *pid_mgr);
-void	wait_for_process(t_pid_manager *pid_mgr);
+void	process_command(char *cmd, char **envp, int *process_count);
+int		wait_for_processes(int count, pid_t last_pid);
+void	show_usage(void);
+char	*search_path(char *cmd, char **envp);
 
-/* PID manager functions */
-t_pid_manager	*init_pid_manager(int capacity);
-void			add_pid(t_pid_manager *pid_mgr, pid_t pid);
-void			cleanup_pid_manager(t_pid_manager *pid_mgr);
+/* Error handling functions */
+void	print_file_error(const char *filename);
+void	system_call_error(const char *message);
+void	print_command_error(const char *command);
+void	handle_execve_error(char *path, char **args);
 
 #endif

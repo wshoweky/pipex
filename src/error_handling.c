@@ -1,0 +1,103 @@
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   error_handling.c                                   :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: wshoweky <wshoweky@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/18 11:11:59 by wshoweky          #+#    #+#             */
+/*   Updated: 2025/08/18 11:38:31 by wshoweky         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
+#include "pipex.h"
+
+/*
+** Frees a NULL-terminated array of strings and the array itself
+** Safely handles NULL pointers and empty arrays
+** Used to free memory allocated by functions like ft_split
+*/
+void	ft_free(char **ptr)
+{
+	int	i;
+
+	i = 0;
+	if (!ptr || !*ptr)
+		return ;
+	while (ptr[i])
+		free(ptr[i++]);
+	free(ptr);
+}
+
+/**
+ * Prints and error message for a file-related failure.
+ * Outputs "pipex: <filename>: <system error message>".
+ * Uses perror to include the errno-based description.
+ */
+void	print_file_error(const char *filename)
+{
+	write(2, "pipex: ", 7);
+	if (filename && filename[0])
+		write(2, filename, ft_strlen(filename));
+	write(2, ": ", 2);
+	perror(NULL);
+}
+
+/**
+ * Prints a system call error and exits the program.
+ * Outputs "pipex: <message>: <system error>" using perror,
+ * then exits with EXIT_FAILURE.
+ */
+void	system_call_error(const char *message)
+{
+	write(2, "pipex: ", 7);
+	perror(message);
+	exit(EXIT_FAILURE);
+}
+
+/**
+ * Prints a "command not found" error to stderr.
+ * If command is NULL or empty, only the standard error
+ * format is printed.
+ */
+void	print_command_error(const char *command)
+{
+	write(2, "pipex: ", 7);
+	if (command && command[0])
+		write(2, command, ft_strlen(command));
+	write(2, ": command not found\n", 20);
+}
+
+/**
+ * Checks if a given command path exists and is executable.
+ * If the file doesn't exist, it prints custom file error,
+ * frees allocated memory and exits with status 127 (command not found).
+ * If the file exists but not executable, it frees memory, prints error
+ * and exits with status 126 (command found but not executable).
+ * If execve still failed, it handles the generic execve system call error.
+ */
+void	handle_execve_error(char *path, char **args)
+{
+	if (access(path, F_OK) != 0)
+	{
+		print_file_error(args[0]);
+		free(path);
+		ft_free(args);
+		exit(127);
+	}
+	else if (access(path, X_OK) != 0)
+	{
+		free(path);
+		ft_free(args);
+		perror("Permission denied");
+		exit(126);
+	}
+	else
+	{
+		write(2, args[0], ft_strlen(args[0]));
+		write(2, ": is a directory\n", 18);
+		free(path);
+		ft_free(args);
+		exit(126);
+	}
+}

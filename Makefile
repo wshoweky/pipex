@@ -1,19 +1,17 @@
 NAME = pipex
 NAME_BONUS = pipex_bonus
-CC = gcc
+CC = cc
 CFLAGS = -Wall -Wextra -Werror
 LIBFT_DIR = libft
 LIBFT = $(LIBFT_DIR)/libft.a
 
-# Main project sources
-SRCS = src/pipex.c src/utils.c
+#Main project source files
+SRCS = src/pipex.c src/error_handling.c src/command.c
 OBJS = $(SRCS:.c=.o)
 
-# Bonus sources
-SRCS_BONUS = src_bonus/pipex_bonus.c src_bonus/heredoc.c src_bonus/process.c src_bonus/utils_bonus.c src_bonus/pid_manager.c
-OBJS_BONUS = $(SRCS_BONUS:.c=.o)
-
-.PHONY: all clean fclean re bonus
+#Bonus source files
+SRC_BONUS = src_bonus/main.c src_bonus/utils.c src_bonus/process.c src_bonus/heredoc.c src_bonus/exe.c src_bonus/error_handling_bonus.c
+OBJS_BONUS = $(SRC_BONUS:.c=.o)
 
 all: $(NAME)
 
@@ -41,4 +39,5 @@ fclean: clean
 
 re: fclean all
 
-rebonus: fclean bonus
+.PHONY: all clean fclean re bonus
+

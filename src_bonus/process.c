@@ -1,63 +1,84 @@
-#include <unistd.h>
-#include <stdio.h>
-#include <fcntl.h>
-#include <sys/wait.h>
+/* ************************************************************************** */
+/*                                                                            */
+/*                                                        :::      ::::::::   */
+/*   process.c                                          :+:      :+:    :+:   */
+/*                                                    +:+ +:+         +:+     */
+/*   By: wshoweky <wshoweky@student.hive.fi>        +#+  +:+       +#+        */
+/*                                                +#+#+#+#+#+   +#+           */
+/*   Created: 2025/08/18 11:37:33 by wshoweky          #+#    #+#             */
+/*   Updated: 2025/08/18 11:37:34 by wshoweky         ###   ########.fr       */
+/*                                                                            */
+/* ************************************************************************** */
+
 #include "pipex_bonus.h"
 
-void	wait_for_process(t_pid_manager *pid_mgr)
+/*
+** Waits for all processes including the last one
+** Returns the exit status of the last command
+** Ensures proper handling of exit status
+*/
+int	wait_for_processes(int count, pid_t last_pid)
 {
-	int	i;
-	int	status;
+	int		i;
+	int		status;
+	int		exit_status;
+	pid_t	pid;
 
-	if (!pid_mgr || !pid_mgr->pids || pid_mgr->count <= 0)
-		return;
-	
 	i = 0;
-	while (i < pid_mgr->count)
+	exit_status = 0;
+	while (i < count)
 	{
-		waitpid(pid_mgr->pids[i], &status, 0);
+		wait(NULL);
 		i++;
 	}
+	pid = waitpid(last_pid, &status, 0);
+	if (pid == last_pid && WIFEXITED(status))
+		exit_status = WEXITSTATUS(status);
+	else if (WIFSIGNALED(status))
+		exit_status = 128 + WTERMSIG(status);
+	return (exit_status);
 }
 
-void	process_command(char *cmd, char **envp, t_pid_manager *pid_mgr)
+/*
+** Closes all file descriptors and exits with an error
+** Used when a fork fails to clean up resources
+*/
+static void	close_all(int *fd)
+{
+	close(fd[0]);
+	close(fd[1]);
+	system_call_error("fork");
+}
+
+/*
+** Processes a single command in the pipeline
+** Creates a pipe and forks a child process
+** Child process executes the command
+** Parent process sets up the next command in the pipeline
+** Increments the process count for proper waiting
+*/
+void	process_command(char *cmd, char **en, int *process_count)
 {
 	pid_t	pid;
 	int		fd[2];
 
-	/* Validate parameters */
-	if (!cmd || !envp || !pid_mgr)
-		error_with_cleanup("process_command: invalid parameters", pid_mgr);
-
 	if (-1 == pipe(fd))
-		error_with_cleanup("pipe", pid_mgr);
-	
+		system_call_error("pipe");
 	pid = fork();
 	if (-1 == pid)
-	{
-		close(fd[0]);
-		close(fd[1]);
-		error_with_cleanup("fork", pid_mgr);
-	}
-	
+		close_all(fd);
 	if (0 == pid)
 	{
-		/* Child process - execute command */
 		close(fd[0]);
 		dup2(fd[1], STDOUT_FILENO);
 		close(fd[1]);
-		exe(cmd, envp);
-		/* exe never returns, but if it does, exit with error */
-		error_with_message("exe failed");
+		exe(cmd, en);
 	}
 	else
 	{
-		/* Parent process - store pid and continue */
 		close(fd[1]);
 		dup2(fd[0], STDIN_FILENO);
 		close(fd[0]);
-		
-		/* Store the child process ID */
-		add_pid(pid_mgr, pid);
+		(*process_count)++;
 	}
 }
