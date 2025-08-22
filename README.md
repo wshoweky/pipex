@@ -1,32 +1,76 @@
-# pipex
+# 🚀 pipex
 
-A Unix pipe implementation in C that mimics the behavior of the shell pipe operator `|`. This project includes both a main implementation and a bonus version with heredoc support and multiple command chaining.
+## 📝 Overview
 
-## Description
+**pipex** is a Unix pipe implementation project from the 42 school curriculum. It recreates the behavior of the shell pipe operator `|` in C, teaching fundamental concepts of process management, file descriptors, and inter-process communication. The project includes both a mandatory part and a bonus version with extended functionality.
 
-### Main Project
-The main project implements a program that takes four arguments:
-- `file1`: input file
-- `cmd1`: first command
-- `cmd2`: second command  
-- `file2`: output file
+## 🔄 Project Logic
 
-The program executes: `< file1 cmd1 | cmd2 > file2`
+### 🛠️ Main Project (2 Commands)
 
-### Bonus Project
-The bonus project extends the functionality with:
-- **Multiple Commands**: Support for 3 or more commands in a pipeline
-- **Heredoc**: Interactive input mode using `here_doc` limiter
-- **Enhanced Error Handling**: Better error messages and status codes
+The program takes 4 arguments and executes: `< file1 cmd1 | cmd2 > file2`
 
-## Usage
-
-### Main Project
 ```bash
 ./pipex file1 cmd1 cmd2 file2
 ```
 
-### Bonus Project
+#### 📊 Flow Diagram
+
+```mermaid
+graph TD
+    A["🚀 Pipex Main"] --> B{"Check arguments"}
+    B -->|"Valid"| C["Create pipe"]
+    B -->|"Invalid"| D["❌ Show error & exit"]
+    
+    C --> E["Fork processes"]
+    
+    E --> F["👶 First Child"]
+    E --> G["👶 Second Child"]
+    E --> H["👨‍👩‍👧‍👦 Parent"]
+    
+    F --> F1["Open input file"]
+    F --> F2["Redirect stdin from file"]
+    F --> F3["Redirect stdout to pipe"]
+    F --> F4["Execute first command"]
+    
+    G --> G1["Open output file"]
+    G --> G2["Redirect stdin from pipe"]
+    G --> G3["Redirect stdout to file"]
+    G --> G4["Execute second command"]
+    
+    H --> H1["Close pipe ends"]
+    H --> H2["Wait for children"]
+    H --> H3["Return exit status"]
+```
+
+#### 🧠 Implementation Steps
+
+1. **🔍 Initialization**:
+   - Parse arguments
+   - Create a pipe
+   - Fork two child processes
+
+2. **👶 First Child Process**:
+   - Redirect stdin from input file
+   - Redirect stdout to pipe write end
+   - Execute the first command
+
+3. **👶 Second Child Process**:
+   - Redirect stdin from pipe read end
+   - Redirect stdout to output file
+   - Execute the second command
+
+4. **👨‍👩‍👧‍👦 Parent Process**:
+   - Close pipe ends
+   - Wait for child processes
+   - Return the last command's exit status
+
+### 🌟 Bonus Project
+
+Extends functionality with:
+- **Multiple Commands**: Support for 3+ commands in a pipeline
+- **Heredoc**: Interactive input mode using `here_doc` limiter
+
 ```bash
 # Multiple commands
 ./pipex_bonus file1 cmd1 cmd2 cmd3 ... outfile
@@ -35,31 +79,90 @@ The bonus project extends the functionality with:
 ./pipex_bonus here_doc LIMITER cmd1 cmd2 ... outfile
 ```
 
-## Examples
+#### 📊 Bonus Flow Diagram
 
-### Main Project
-```bash
-# Count lines in a file
-./pipex input.txt "cat" "wc -l" output.txt
-
-# Search for lines containing "test" and count them
-./pipex input.txt "grep test" "wc -l" output.txt
-
-# Replace text and sort
-./pipex input.txt "sed 's/old/new/'" "sort" output.txt
+```mermaid
+graph TD
+    A["🚀 Pipex Main"] --> B{"Check argc & argv[1]"}
+    B -->|"argc == 5"| C["🟢 Process input file"]
+    B -->|"argc != 5"| D["❌ Show usage & exit"]
+    
+    C --> E["heredoc_run_first_cmd()"]
+    D --> F["🔴 Exit program"]
+    
+    E --> G["Read lines from STDIN"]
+    F --> Z["End"]
+    
+    G --> H{"Line == delimiter?"}
+    H -->|"No"| I["Write line to pipe fd[1]"]
+    H -->|"Yes"| J["ropipe() & process first cmd"]
+    
+    I --> G
+    
+    J --> K["Open infile as prev_read"]
+    
+    K --> L["process_cmd[0]"]
+    
+    L --> M["Wait for commands"]
+    
+    M --> N{"i < 3 or 4 depending on mode"}
+    
+    N -->|"Yes"| O["ropipe()"]
+    N -->|"No"| P["🟣 Last command"]
+    
+    O --> Q["process_cmd[i+1]"]
+    Q --> M
+    
+    P --> R["run_last_cmd_and_wait_all()"]
+    
+    R --> S["Open outfile as pipe_fd[1]"]
+    
+    S --> T["process_cmd[last command]"]
+    
+    T --> U["wait() for all children"]
+    
+    U --> V["🟢 Exit"]
 ```
 
-### Bonus Project
-```bash
-# Multiple commands: cat -> grep -> wc -l
-./pipex_bonus input.txt "cat" "grep line" "wc -l" output.txt
+#### 🧠 Bonus Implementation
 
-# Heredoc with multiple commands
-./pipex_bonus here_doc END "cat" "grep -v date" "sort" output.txt
-# Then type lines and end with "END"
-```
+1. **🔍 Initialization**:
+   - Parse arguments
+   - Check for heredoc mode
 
-## Building
+2. **📝 Heredoc Handling**:
+   - Create a pipe
+   - Fork a child process for input
+   - Read input until limiter is found
+   - Write directly to the pipe
+
+3. **⛓️ Process Chain**:
+   - Create pipes between commands
+   - Fork child processes for each command
+   - Connect stdout/stdin between processes
+   - Execute commands in their own processes
+
+4. **🏁 Finalization**:
+   - Wait for all processes
+   - Return the exit status of the last command
+
+## 🛡️ Error Handling
+
+The project implements robust error handling with:
+
+- **Exit Codes**:
+  - 0: Success
+  - 1: General error
+  - 126: Permission denied
+  - 127: Command not found
+  - 128+n: Fatal error signal n
+
+- **Error Messages**:
+  - File errors: `pipex: filename: No such file or directory`
+  - Command errors: `pipex: command: command not found`
+  - System call errors: `pipex: function: error message`
+
+## 🔨 Building & Testing
 
 ```bash
 # Build main project
@@ -78,80 +181,54 @@ make clean
 make fclean
 ```
 
-## Testing
+## 🧩 Common Challenges & Solutions
 
-All test scripts are located in the `test/` directory.
+### 🧟 Zombie Processes
+**Challenge**: Child processes become zombies if exit status isn't collected.
 
-### Quick Tests
-```bash
-# Test main project
-./test/test_main.sh
+**Solution**: Use `waitpid(-1, &status, 0)` to collect any child's exit status as soon as it terminates.
 
-# Test bonus project
-./test/test_bonus.sh
+### 💧 Memory Leaks
+**Challenge**: Dynamically allocated memory for command arguments can leak.
 
-# Run all tests
-./test/run_all_tests.sh
-```
+**Solution**: Implement a robust `ft_free` function to properly free all allocated memory.
 
-### Test Directory Structure
-```
-test/
-├── test_main.sh          # Main project tests
-├── test_bonus.sh         # Bonus project tests
-└── run_all_tests.sh      # Complete test suite
-```
+### 🔍 Command Path Resolution
+**Challenge**: Finding the correct executable path.
 
-## Features
+**Solution**: Search both current directory and PATH environment variable directories.
 
-### Main Project
-- ✅ Basic pipe functionality (2 commands)
-- ✅ Proper error handling
-- ✅ Memory leak prevention
-- ✅ Robust command execution
-- ✅ File permission handling
-- ✅ Environment variable support
+### ⚡ Signal Handling
+**Challenge**: Properly handling signals from child processes.
 
-### Bonus Project
-- ✅ Multiple command support (3+ commands)
-- ✅ Heredoc functionality
-- ✅ Enhanced error handling
-- ✅ Process management
-- ✅ All main project features
+**Solution**: Use `WIFEXITED`, `WEXITSTATUS`, `WIFSIGNALED`, and `WTERMSIG` macros to interpret termination status.
 
-## Error Handling
+## 📚 Learning Resources
 
-Both projects handle various error conditions:
-- Invalid number of arguments
-- File not found
-- Command not found
-- Permission denied
-- Memory allocation failures
-- Pipe creation failures
-- Fork failures
+- 📹 [Unix Processes in C](https://www.youtube.com/watch?v=cex9XrZCU14)
+- 📖 [Pipes in C](https://www.geeksforgeeks.org/pipe-system-call/)
+- 📘 [Advanced Programming in the UNIX Environment](https://www.amazon.com/Advanced-Programming-UNIX-Environment-3rd/dp/0321637739)
+- 🌐 [The Linux Programming Interface](https://man7.org/tlpi/)
+- 📜 [POSIX Standard](https://pubs.opengroup.org/onlinepubs/9699919799/)
 
-## Project Structure
+## 📦 Project Structure
 
 ```
 pipex/
 ├── src/                  # Main project source files
-│   ├── pipex.c          # Main program logic
-│   ├── pipex.h          # Main project header
-│   └── utils.c          # Utility functions
 ├── src_bonus/           # Bonus project source files
-│   ├── pipex_bonus.c    # Bonus main program
-│   ├── pipex_bonus.h    # Bonus project header
-│   ├── heredoc.c        # Heredoc implementation
-│   ├── process.c        # Process management
-│   └── utils_bonus.c    # Bonus utility functions
 ├── libft/               # Custom library functions
 ├── test/                # Test scripts
 └── Makefile             # Build system
 ```
 
-## Dependencies
+## 📋 Dependencies
 
 - GCC compiler
 - Standard C libraries
 - Unix/Linux environment
 - Custom libft library (included)
+
+---
+
+😎 Happy coding and good luck with your pipex journey!
